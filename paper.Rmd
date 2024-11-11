@@ -1,0 +1,370 @@
+---
+title: "Ride at Your Own Risk: Insights into Toronto's Bicycle Theft Hotspots"
+subtitle: "[To Be Updated....]"
+author: "Kevin You"
+thanks: "Code and data are available at: [https://github.com/Kluckyyou/STA313A2](https://github.com/Kluckyyou/STA313A2)."
+date: 2024.Nov.12
+output: html_document
+bibliography: references.bib
+---
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE, include=TRUE, eval=TRUE)
+
+required_packages <- c("lubridate", "sf", "tidyverse", "readr", "here", "osmdata", "ggplot2")
+for (p in required_packages) {
+  if (!require(p, character.only = TRUE)) {
+    install.packages(p, character.only = TRUE)
+  }
+}
+
+library(lubridate)
+library(tidyverse)
+library(ggplot2)
+library(osmdata)
+library(readr)
+library(here)
+library(sf)
+
+# you are welcome to use either the CSV file or the GeoJSON file
+# GeoJSON format maybe useful if you would like to combine
+# an external geospatial dataset
+bike_thefts_csv <- read_csv(here("data/clean_data.csv")) |>
+  mutate(
+    occurence_date = as_date(
+      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
+    ),
+    report_date = as_date(
+      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
+    )
+  )
+bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
+  mutate(
+    occurence_date = as_date(
+      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
+    ),
+    report_date = as_date(
+      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
+    )
+  )
+```
+Map
+```{r, include = TRUE, warning = FALSE, message = FALSE}
+# Load cleaned coordinates data
+coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
+
+# Get bounding box for Toronto (approximate limits for Toronto)
+toronto_bbox <- c(-79.6303856025883, 43.5822069220627, -79.1180336515019, 43.8554571861712)
+
+# Fetch map data from OpenStreetMap (OSM)
+toronto_map <- opq(bbox = toronto_bbox) %>%
+  add_osm_feature(key = "highway", value = "primary") %>%
+  add_osm_feature(key = 'highway', value = 'secondary') %>%
+  add_osm_feature(key = 'highway', value = 'tertiary') %>%
+  add_osm_feature(key = 'highway', value = 'residential') %>%
+  osmdata_sf()
+
+# Convert map data to Simple Features (sf) objects
+streets <- toronto_map$osm_lines
+
+# Plot the map with bike theft locations data
+ggplot() +
+  geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) + # OSM street map layer
+  geom_point(
+    data = coordinates_data, aes(x = longitude, y = latitude),
+    size = 0.5, color = "red"
+  ) + # Bike theft points
+  labs(
+    title = "Map of Bicycle Theft Locations in Toronto",
+    x = "Longitude", y = "Latitude"
+  ) +
+  coord_sf(
+    xlim = c(-79.6303856025883, -79.1180336515019),
+    ylim = c(43.5822069220627, 43.8554571861712), expand = FALSE
+  ) +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(), # Remove panel background
+    panel.grid.major = element_blank(), # Remove major grid lines
+    panel.grid.minor = element_blank(), # Remove minor grid lines
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+# introduction
+write an intro to convey the issue
+the goal of the article :be careful of bikes
+
+# When Are Bikes at the Greatest Risk? A Look at Seasonal and weekly Patterns
+
+```{r mothly_plot, include = TRUE, warning = FALSE, message = FALSE, fig.width=11, fig.height=5}
+# Load necessary libraries
+library(tidyverse)
+library(ggridges)
+library(cowplot)
+library(here)
+
+# Load your data
+data <- read_csv(here("data", "Theft_and_Found_Counts_By_Month_2014_2024.csv"), show_col_types = FALSE)
+
+# Convert month names to month numbers for ordering
+data <- data %>%
+  mutate(OCC_MONTH_NUM = factor(OCC_MONTH, levels = month.name))
+
+# Specify levels for OCC_YEAR to order from 2014 to 2024
+data$OCC_YEAR <- factor(data$OCC_YEAR, levels = 2014:2024)
+
+# Calculate a scaled height for "Found" data by dividing by the maximum "Found" value
+max_found <- max(data$Found, na.rm = TRUE)
+max_stolen <- max(data$Stolen, na.rm = TRUE)
+
+# Plot for Bikes Found with scaled heights
+plot_found <- ggplot(data, aes(x = OCC_MONTH_NUM, y = OCC_YEAR, 
+                               height = (Found / max_found) * 4, group = OCC_YEAR)) +
+  geom_ridgeline(
+    fill = "#05595B", color = "white", alpha = 0.5, scale = 1, linewidth = 0
+  ) +
+  labs(y = "", x = NULL) +  # Remove x-axis title
+  theme_minimal() +
+  theme(
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(size = 0.5),
+    panel.border = element_blank(),
+    plot.title = element_text(size = 10, color = "#05595B", hjust = -0.1, vjust = 1.5),  # Smaller title
+    panel.background = element_rect(fill = "#f0f8ff", color = NA),  # Light blue background for plot area
+    plot.background = element_rect(fill = "#f0f8ff", color = NA)    # Light blue background for overall plot
+  ) +
+  scale_x_discrete(labels = month.abb) +
+  ggtitle("Bikes Found")  # Add title for Bikes Found
+
+# Plot for Bikes Stolen with scaled heights and no borders
+plot_stolen <- ggplot(data, aes(x = OCC_MONTH_NUM, y = OCC_YEAR, 
+                                height = (Stolen / max_stolen) * 4, group = OCC_YEAR)) +
+  geom_ridgeline(
+    fill = "#603601", color = "white", alpha = 0.5, scale = 1, linewidth = 0
+  ) +
+  labs(y = "", x = NULL) +  # Remove x-axis title
+  theme_minimal() +
+  theme(
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(size = 0.5),
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "#f0f8ff", color = NA),  # Light blue background for plot area
+    plot.background = element_rect(fill = "#f0f8ff", color = NA),   # Light blue background for overall plot
+    plot.title = element_text(size = 10, color = "#603601", hjust = -0.1, vjust = 1.5)  # Smaller title
+  ) +
+  scale_x_discrete(labels = month.abb) +
+  ggtitle("Bikes Stolen")  # Add title for Bikes Stolen
+
+# Combine the plots side by side
+combined_plot <- plot_grid(plot_found, plot_stolen, nrow = 1)
+
+# Display the combined plot
+combined_plot
+
+```
+
+```{r interactive_weekly_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=7, fig.height=4}
+library(plotly)
+library(readr)
+library(dplyr)
+library(here)
+
+# Load the data
+data <- read_csv(here("data", "Theft_Counts_By_Day.csv"), show_col_types = FALSE)
+
+# Arrange data by day of the week (Monday to Sunday)
+data <- data %>%
+  arrange(factor(OCC_DOW, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
+
+# Initialize plot with a line trace for the entire data
+fig <- plot_ly(data, x = ~OCC_DOW, y = ~Number_of_Thefts, type = 'scatter', mode = 'lines+markers',
+               line = list(color = 'brown'), marker = list(color = 'blue', size = 8))
+
+# Add points for each day with initial visibility settings
+for (i in 1:nrow(data)) {
+  fig <- fig %>%
+    add_trace(
+      x = data$OCC_DOW[i],
+      y = data$Number_of_Thefts[i],
+      type = 'scatter',
+      mode = 'markers+text',
+      text = paste("Thefts:", data$Number_of_Thefts[i]),
+      textposition = "top center",
+      marker = list(color = "yellow", size = 10),
+      showlegend = FALSE,
+      visible = ifelse(i == 1, TRUE, FALSE)
+    )
+}
+
+# Define steps for each day in the slider
+steps <- lapply(1:nrow(data), function(i) {
+  step <- list(
+    method = "restyle",
+    args = list("visible", as.list(rep(FALSE, nrow(data) + 1))),  # +1 to include the main line trace
+    label = data$OCC_DOW[i]
+  )
+  step$args[[2]][i + 1] <- TRUE  # Make only the current day’s point visible (offset by 1 due to main line trace)
+  step$args[[2]][1] <- TRUE       # Keep the main line trace visible
+  return(step)
+})
+
+# Add layout with the slider and set background colors
+fig <- fig %>%
+  layout(
+    xaxis = list(title = ""),
+    yaxis = list(title = "Number of Thefts"),
+    sliders = list(
+      list(
+        active = 0,
+        currentvalue = list(prefix = "Day: "),
+        steps = steps
+      )
+    ),
+    plot_bgcolor = "#f0f8ff",     # Set background color for the plotting area
+    paper_bgcolor = "#f0f8ff"     # Set background color for the entire plot
+  )
+
+# Display the plot
+fig
+
+```
+
+# What Makes a Bike a Target? Analyzing Theft by Bicycle Type and Value
+Discuss any available data on bike types, brands, or values, showing if certain bikes are more vulnerable to theft than others.
+
+# A Decade of Disappearing Bikes: Tracing Theft Trends Over Ten Years
+
+```{r animated_bar_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=7, fig.height=4}
+# Libraries
+library(ggplot2)
+library(gganimate)
+library(readr)
+library(here)
+library(dplyr)
+
+# Load the data
+data <- read_csv(here("data", "Stolen_Found_Counts.csv"), show_col_types = FALSE)
+
+# Rename "THEFT" to "Stolen" in the Offence_Category column
+data <- data %>%
+  mutate(Offence_Category = ifelse(Offence_Category == "THEFT", "Stolen", Offence_Category))
+
+# Set the number of frames for the animation
+max_frames <- 100  # Total number of frames for smooth animation
+
+# Generate interpolated data for simultaneous increase
+animated_data <- data %>%
+  # Repeat each category for each frame
+  group_by(Offence_Category) %>%
+  do(data.frame(
+    Offence_Category = .$Offence_Category,
+    Number_of_Offences = seq(0, .$Number_of_Offences, length.out = max_frames),
+    frame = 1:max_frames
+  ))
+
+# Ensure Offence_Category is a factor for proper ordering
+animated_data$Offence_Category <- as.factor(animated_data$Offence_Category)
+
+# Define custom colors for each category
+custom_colors <- c("Stolen" = "#603601", "FOUND" = "#4682B4", "Other" = "#eedaaf")
+
+# Create the animated bar plot
+ggplot(animated_data, aes(x=Offence_Category, y=Number_of_Offences, fill=Offence_Category)) + 
+  geom_bar(stat='identity') +
+  theme_minimal() +
+  labs(x = 'Offense Category', y = 'Number of Offences') +
+  
+  # Apply custom colors
+  scale_fill_manual(values = custom_colors) +
+  
+  # Remove the legend title
+  guides(fill = guide_legend(title = NULL)) +
+  
+  # Set background colors for panel and plot
+  theme(
+    panel.background = element_rect(fill = "#f0f8ff", color = NA),
+    plot.background = element_rect(fill = "#f0f8ff", color = NA)
+  ) +
+  
+  # gganimate specific settings for smooth transition
+  transition_states(
+    frame,
+    transition_length = 2,
+    state_length = 1
+  ) +
+  ease_aes('linear')  # Ensures a smooth, even increase
+
+```
+<div style="color: grey; font-size: 12 px; margin-top: 3px;"> Displays the count of various bicycle-related offences reported to the Toronto Police Service, highlighting categories such as stolen, found, and other incidents. The smooth increase in bar heights emphasizes the scale of each offence type, offering insights into the distribution and relative frequency of these incidents from 2014 to 2024 </div> \ 
+
+
+```{r animated_line_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=6, fig.height=3}
+# Load necessary libraries
+library(ggplot2)
+library(gganimate)
+library(dplyr)
+library(hrbrthemes)
+library(readr)
+library(here)
+
+# Load your data
+data <- read_csv(here("data", "Bicycle_Theft_Monthly_Counts.csv"), show_col_types = FALSE)
+
+# Create a numeric month order variable
+data <- data %>%
+  mutate(
+    OCC_MONTH_NUM = match(OCC_MONTH, c("January", "February", "March", "April", "May", 
+                                       "June", "July", "August", "September", "October", 
+                                       "November", "December"))
+  )
+
+# Create the animated plot
+plot <- data %>%
+  ggplot(aes(x = OCC_MONTH_NUM, y = Number_of_Thefts, group = as.factor(OCC_YEAR), color = as.factor(OCC_YEAR))) +
+  geom_line() +
+  geom_point() +
+  scale_color_viridis_d() +
+  ylab("Number of Bikes Stolen") +
+  xlab("Month") +
+  scale_x_continuous(breaks = 1:12, labels = c("January", "February", "March", "April", "May", "June", 
+                                               "July", "August", "September", "October", "November", "December")) +
+  theme_ipsum() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.background = element_rect(fill = "#f0f8ff", color = NA),
+    plot.background = element_rect(fill = "#f0f8ff", color = NA)
+  ) +
+  transition_reveal(OCC_MONTH_NUM) +
+  labs(color = "Year")
+
+# Render the animation
+animate(plot, nframes = 100, fps = 10)
+
+```
+<div style="color: grey; font-size: 12 px; margin-top: 3px;"> Visualizes the monthly count of bicycle thefts reported to the Toronto Police Service from 2014 to June 2024. The animation reveals seasonal patterns and variations across different years, providing insights into peak months and potential trends over time. </div> \ 
+
+# Mapping the Danger Zones: High-Risk Locations Across Toronto
+Use a map visualization to highlight theft hotspots across Toronto, pointing out neighborhoods or transit hubs with the highest incidence rates.
+
+- map
+
+# Discussion 
+- Consolidation of all the info that we present, we first talk about...this is how all visualizations are connected together, in the future what can be done...
+
+# Conclusion
+- short reminder for the audience, tips to protect their bikes
+
+
+General tips: 
+ - This paper wants to tell the story about tips to protect bikes
+ 
+ - after every visualizations talk a bit about the visualization itself, key points, make sure the story that we are talking about is proved by this visualization so each plot make sense (for example in 2016 there is a peak in May illustrated by the visualization, why? find relevant news and articels to explain it and cite), 用更descriptive的形式去explain 你的visualization plot with proves. 
+ 
