@@ -118,8 +118,8 @@ d3.csv("Bicycle_Thefts_Open_Data.csv").then(data => {
   
     // Show only the selected chart
     function updateChart() {
-      const selectedPlot = document.getElementById("plot-selector").value;
-      document.querySelectorAll(".chart").forEach(chart => {
+      const selectedPlot = document.getElementById("time-selector").value;
+      document.querySelectorAll(".timechart").forEach(chart => {
         chart.style.display = "none";
       });
       document.getElementById(`${selectedPlot}-chart`).style.display = "block";
@@ -127,7 +127,7 @@ d3.csv("Bicycle_Thefts_Open_Data.csv").then(data => {
   
     // Set initial view and add event listener for dropdown change
     updateChart();
-    document.getElementById("plot-selector").addEventListener("change", updateChart);
+    document.getElementById("time-selector").addEventListener("change", updateChart);
   });
   
   

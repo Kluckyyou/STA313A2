@@ -17,8 +17,8 @@
 
       <div id="theft-overview">
         <h2>Bicycle Theft Overview</h2>
-        <label for="plot-selector">Select Plot:</label>
-        <select id="plot-selector">
+        <label for="time-selector">Select Plot:</label>
+        <select id="time-selector">
           <option value="year">Bikes Lost by Year</option>
           <option value="month">Bikes Lost by Month</option>
           <option value="dayOfWeek">Bikes Lost by Day of Week</option>
@@ -26,10 +26,10 @@
         </select>
         
         <div id="chart-container">
-          <div id="year-chart" class="chart"></div>
-          <div id="month-chart" class="chart"></div>
-          <div id="dayOfWeek-chart" class="chart"></div>
-          <div id="hour-chart" class="chart"></div>
+          <div id="year-chart" class="timechart"></div>
+          <div id="month-chart" class="timechart"></div>
+          <div id="dayOfWeek-chart" class="timechart"></div>
+          <div id="hour-chart" class="timechart"></div>
         </div>
         
         <p>From Figure 1, we can see that the number of bicycle thefts that occur each year is large. Even though there has been a downward trend in recent years, nearly 3,000 bicycles have still been stolen. This is enough for us to pay attention.</p>
@@ -40,13 +40,17 @@
 
       <div id="their-targets">
         <h2>What are their targets?</h2>
-        <label for="top8-selector">Select Category:</label>
-        <select id="top8-selector">
-            <option value="DIVISION">Division</option>
-            <option value="LOCATION_TYPE">Location Type</option>
-            <option value="PREMISES_TYPE">Premises Type</option>
+        <label for="location-selector">Select Category:</label>
+        <select id="location-selector">
+            <option value="division">division</option>
+            <option value="location">location</option>
+            <option value="premises">premises</option>
         </select>
-        <div id="top8-chart" class="chart"></div>
+        <div id="locationchart-container">
+            <div id="division-chart" class="locationchart"></div>
+            <div id="location-chart" class="locationchart"></div>
+            <div id="premises-chart" class="locationchart"></div>
+        </div>
 
         <p>Unfortunately, detailed data on specific bicycle types or values targeted by thieves is not provided in this article. However, it is commonly known that thieves often prefer high-value bicycles or popular brands that are easier to resell. Features like expensive components, lack of secure locks, or being left unattended for long periods can make a bicycle more attractive to thieves.</p>
       </div>
@@ -69,5 +73,6 @@
       </div>
     </main>
     <script src="script.js"></script>
+    <script src="script_top8.js"></script>
   </body>
 </html>
