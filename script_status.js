@@ -1,8 +1,11 @@
 // Load the data
 d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
 
+    // Filter for specific STATUS values
+    const filteredData = data.filter(d => ["STOLEN", "RECOVERED", "UNKNOWN"].includes(d.STATUS));
+
     // Prepare the data for the STATUS pie chart
-    const statusCounts = d3.rollup(data, v => v.length, d => d.STATUS);
+    const statusCounts = d3.rollup(filteredData, v => v.length, d => d.STATUS);
     const totalCases = d3.sum(statusCounts.values());
 
     // Set dimensions for the pie chart
@@ -28,7 +31,7 @@ d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
     const pie = d3.pie().value(d => d[1]);
     const arc = d3.arc().innerRadius(0).outerRadius(radius);
 
-    // Draw pie chart
+    // Draw main pie chart
     svg.selectAll("path")
         .data(pie(statusCounts))
         .enter().append("path")
@@ -46,8 +49,8 @@ d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
         })
         .on("click", (event, d) => {
             // Filter data based on selected status and calculate time difference
-            const filteredData = data.filter(row => row.STATUS === d.data[0]);
-            const timeDiffs = filteredData.map(row => {
+            const statusFilteredData = filteredData.filter(row => row.STATUS === d.data[0]);
+            const timeDiffs = statusFilteredData.map(row => {
                 const occDate = new Date(row.OCC_DATE);
                 const reportDate = new Date(row.REPORT_DATE);
                 const diffHours = (reportDate - occDate) / (1000 * 60 * 60);
@@ -68,8 +71,9 @@ d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
 
     // Function to draw the sub pie chart
     function drawSubPieChart(data, total) {
-        // Clear existing sub pie chart
+        // Clear existing sub pie chart and legend
         d3.select("#sub-pie-chart").selectAll("*").remove();
+        d3.select("#sub-pie-legend").selectAll("*").remove();
 
         const subSvg = d3.select("#sub-pie-chart")
             .append("svg")
@@ -96,5 +100,36 @@ d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
             .on("mouseout", () => {
                 tooltip.transition().duration(500).style("opacity", 0);
             });
+
+        // Draw sub-pie legend for time ranges
+        drawLegend("#sub-pie-legend", data.map(d => d[0]), color);
     }
+
+    // Function to draw legends with improved spacing
+    function drawLegend(containerId, categories, colorScale) {
+        const legend = d3.select(containerId)
+            .append("svg")
+            .attr("width", 200)
+            .attr("height", categories.length * 30)
+            .selectAll("g")
+            .data(categories)
+            .enter().append("g")
+            .attr("transform", (d, i) => `translate(0, ${i * 30})`);
+
+        legend.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", d => colorScale(d));
+
+        legend.append("text")
+            .attr("x", 30) // Add space between the box and text
+            .attr("y", 15)
+            .style("font-size", "12px")
+            .text(d => d);
+    }
+
+    // Draw main legend for STATUS pie chart
+    drawLegend("#status-legend", Array.from(statusCounts.keys()), color);
 });
