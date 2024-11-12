@@ -1,0 +1,342 @@
+---
+title: "A2 Sample"
+author: "Author A & Author B"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, eval=TRUE)
+required_packages <- c(
+  "lubridate", "sf", "tidyverse", "ggplot2", "ggiraph", "gganimate", "ggmap", "osmdata"
+  # include any packages to be installed here
+) 
+for (p in required_packages) { # install if missing
+  if (!require(p, character.only = TRUE)) {
+    install.packages(p, character.only = TRUE)
+  }
+}
+library(lubridate)
+library(tidyverse)
+library(sf)
+library(ggiraph)
+library(ggmap)
+library(osmdata)
+# you are welcome to use either the CSV file or the GeoJSON file
+# GeoJSON format maybe useful if you would like to combine
+# an external geospatial dataset
+bike_thefts_csv <- read_csv("data/Bicycle_Thefts_Open_Data.csv")
+bike_thefts_sf <- read_sf("data/Bicycle_Thefts_Open_Data.geojson") |>
+  mutate(
+    occurence_date = as_date(
+      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
+    ),
+    report_date = as_date(
+      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
+    )
+  )
+```
+
+```{r include=FALSE}
+# Check the first few values of OCC_DATE and REPORT_DATE
+head(bike_thefts_csv$OCC_DATE, 10)
+head(bike_thefts_csv$REPORT_DATE, 10)
+head(bike_thefts_csv$occurence_date, 10)
+head(bike_thefts_csv$report_date, 10)
+```
+
+```{r include=FALSE}
+
+# Checking for NAs again after transformation
+summary_bike_thefts_fixed <- bike_thefts_csv %>%
+  summarise(across(everything(), ~ sum(is.na(.)))) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "na_count")
+
+summary_bike_thefts_fixed
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Grouping by OCC_MONTH and counting the number of thefts, then ranking the months in order
+monthly_thefts <- bike_thefts_csv %>%
+  group_by(OCC_MONTH) %>%
+  summarise(theft_count = n()) %>%
+  arrange(match(OCC_MONTH, month.abb))
+
+# Creating an interactive bar chart of OCC_MONTH versus number of thefts with zoom capabilities
+ggplot_interactive <- ggplot(monthly_thefts, aes(x = OCC_MONTH, y = theft_count, tooltip = theft_count, data_id = OCC_MONTH)) +
+  geom_bar_interactive(stat = "identity", fill = "steelblue", width = 0.7) +
+  labs(
+    title = "Bicycle Thefts by Month",
+    x = "Month of Occurrence",
+    y = "Number of Bicycle Thefts"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.spacing = unit(1, "lines"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+# Adding interactive zoom functionality
+girafe(ggobj = ggplot_interactive)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# Calculating the number of thefts in each hour of the day for each weekday
+hourly_weekday_count <- bike_thefts_csv %>%
+  group_by(OCC_DOW, OCC_HOUR) %>%
+  summarise(theft_count = n(), .groups = 'drop') %>%
+  ungroup()
+
+# Creating a scatter line plot with different colors for each weekday
+ggplot_hour_weekday <- ggplot(hourly_weekday_count, aes(x = OCC_HOUR, y = theft_count, color = OCC_DOW, group = OCC_DOW)) +
+  geom_line(size = 1.2) +
+  geom_point_interactive(aes(tooltip = paste("Hour:", OCC_HOUR, "<br> Thefts:", theft_count)), size = 2) +
+  labs(
+    title = "Bicycle Thefts by Hour and Weekday",
+    x = "Hour of the Day",
+    y = "Number of Bicycle Thefts",
+    color = "Weekday"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.spacing = unit(1, "lines"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.margin = margin(1, 2, 1, 2, "cm")  # Adding space to horizontally stretch the chart
+  ) +
+  coord_cartesian(expand = TRUE) +  # Expanding the horizontal space
+  transition_reveal(OCC_HOUR)
+
+# Adding animation for the scatter line plot
+# Ensure required packages for rendering animation are installed
+if (!requireNamespace("gifski", quietly = TRUE)) install.packages("gifski")
+if (!requireNamespace("av", quietly = TRUE)) install.packages("av")
+if (!requireNamespace("magick", quietly = TRUE)) install.packages("magick")
+
+animate(ggplot_hour_weekday, nframes = 100, fps = 10)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Top 10 neighborhoods by bike theft incidents
+top_neighbourhoods <- bike_thefts_csv %>%
+  count(NEIGHBOURHOOD_140) %>%
+  arrange(desc(n)) %>%
+  head(10)
+
+# Bar plot of top neighborhoods
+ggplot(top_neighbourhoods, aes(x = reorder(NEIGHBOURHOOD_140, n), y = n)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Top 10 Neighborhoods by Bike Theft Incidents", x = "Neighborhood", y = "Number of Thefts")
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Get bounding box for Toronto (approximate limits for Toronto)
+toronto_bbox <- c(-79.6303856025883, 43.5822069220627, -79.1180336515019, 43.8554571861712)
+
+# Fetch map data from OpenStreetMap (OSM)
+toronto_map <- opq(bbox = toronto_bbox) %>%
+  add_osm_feature(key = "highway", value = "primary") %>%
+  add_osm_feature(key = 'highway', value = 'secondary') %>%
+  add_osm_feature(key = 'highway', value = 'tertiary') %>%
+  add_osm_feature(key = 'highway', value = 'residential') %>%
+  osmdata_sf()
+
+# Aggregate neighborhoods by division
+divisions <- st_read("data/TPS_POLICE_DIVISIONS_1455152879175798879.gpkg", quiet = TRUE)
+neighborhoods_per_division <- bike_thefts_csv %>%
+  group_by(DIVISION) %>%
+  summarise(theft_count = n(),
+            neighborhoods = paste(unique(NEIGHBOURHOOD_158), collapse = ", "))
+
+# Merge the aggregated data with division boundaries
+divisions <- divisions %>% 
+  left_join(neighborhoods_per_division, by = c("DIV" = "DIVISION")) %>%
+  mutate(tooltip = paste("Division:", DIV, "<br>",
+                         "Theft Count:", theft_count, "<br>",
+                         "Neighborhoods:", neighborhoods))
+
+
+# Plot using ggplot2 with OSM background
+p <- ggplot() +
+  geom_sf(data = toronto_map$osm_lines, color = "grey80", size = 0.2) +  # OSM streets as background
+  geom_sf_interactive(data = divisions, aes(fill = theft_count, tooltip = tooltip, data_id = DIV), 
+                      color = "black", inherit.aes = FALSE, alpha = 0.6) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Toronto Police Divisions by Bicycle Theft Count", fill = "Theft Count") +
+  theme_minimal()
+
+# Render the interactive plot
+girafe(ggobj = p)
+```
+
+```{r include=FALSE}
+# Count the total number of unique premises types
+premises_type_count <- bike_thefts_csv %>%
+  group_by(PREMISES_TYPE) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+# Display the result
+premises_type_count
+
+# Count the number of unique values for all variables in the dataset
+unique_values_count <- bike_thefts_csv %>%
+  summarise(across(everything(), ~ n_distinct(.))) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "unique_count")
+
+# Display the result
+unique_values_count
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Plotting the number of crimes by premises type
+ggplot(bike_thefts_csv, aes(x = PREMISES_TYPE)) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(
+    title = "Number of Bike Thefts by Premises Type",
+    x = "Premises Type",
+    y = "Number of Crimes"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Creating a pie chart of theft cases by STATUS
+status_count <- bike_thefts_csv %>%
+  group_by(STATUS) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(percentage = count / sum(count) * 100)
+
+# Interactive Pie chart of theft status
+library(ggiraph)
+ggplot_status_interactive <- ggplot(status_count, aes(x = "", y = count, fill = STATUS, tooltip = paste(STATUS, "- Count:", count, " (", round(percentage, 2), "%)"))) +
+  geom_bar_interactive(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(
+    title = "Bicycle Theft Cases by Status",
+    fill = "Status"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.title = element_text(face = "bold")
+  )
+
+girafe(ggobj = ggplot_status_interactive)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# Convert date columns from string format to POSIXct date-time format
+bike_thefts_csv <- bike_thefts_csv %>%
+  mutate(
+    occurence_date = mdy_hms(OCC_DATE),
+    report_date = mdy_hms(REPORT_DATE)
+  )
+
+# Calculating time difference and categorizing the report time differences
+bike_thefts_csv <- bike_thefts_csv %>%
+  mutate(
+    time_diff = as.numeric(difftime(report_date, occurence_date, units = "hours")),
+    time_category = case_when(
+      time_diff <= 24 ~ "Within 24 hours",
+      time_diff > 24 & time_diff <= 48 ~ "1 to 2 days",
+      time_diff > 48 & time_diff <= 168 ~ "2 to 7 days",
+      time_diff > 168 ~ "Over 7 days"
+    )
+  )
+
+# Counting the number of thefts in each time category
+time_category_count <- bike_thefts_csv %>%
+  group_by(time_category) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(percentage = count / sum(count) * 100)
+
+# Interactive Pie chart of report time differences
+ggplot_time_category_interactive <- ggplot(time_category_count, aes(x = "", y = count, fill = time_category, tooltip = paste(time_category, "- Count:", count, " (", round(percentage, 2), "%)"))) +
+  geom_bar_interactive(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  scale_fill_brewer(palette = "Set3") + # Adding color palette to ensure enough colors for all categories
+  labs(
+    title = "Bicycle Theft Cases by Report Time Difference",
+    fill = "Report Time Difference"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.title = element_text(face = "bold")
+  )
+
+# Render the interactive pie chart
+girafe(ggobj = ggplot_time_category_interactive)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Creating a pie chart of theft cases by BIKE_TYPE
+bike_type_count <- bike_thefts_csv %>%
+  group_by(BIKE_TYPE) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(percentage = count / sum(count) * 100)
+
+# Interactive Pie chart of theft cases by BIKE_TYPE
+ggplot_bike_type_interactive <- ggplot(bike_type_count, aes(x = "", y = count, fill = BIKE_TYPE, tooltip = paste(BIKE_TYPE, "- Count:", count, " (", round(percentage, 2), "%)"))) +
+  geom_bar_interactive(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  scale_fill_brewer(palette = "Set3") + # Adding color palette to ensure enough colors for all categories
+  labs(
+    title = "Bicycle Theft Cases by Bike Type",
+    fill = "Bike Type"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.title = element_text(face = "bold")
+  )
+
+girafe(ggobj = ggplot_bike_type_interactive)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Creating 7 levels for BIKE_COST
+bike_thefts_csv <- bike_thefts_csv %>%
+  mutate(
+    bike_cost_level = case_when(
+      BIKE_COST <= 100 ~ "< $100",
+      BIKE_COST > 100 & BIKE_COST <= 300 ~ "$100 - $300",
+      BIKE_COST > 300 & BIKE_COST <= 500 ~ "$300 - $500",
+      BIKE_COST > 500 & BIKE_COST <= 1000 ~ "$500 - $1000",
+      BIKE_COST > 1000 & BIKE_COST <= 2000 ~ "$1000 - $2000",
+      BIKE_COST > 2000 & BIKE_COST <= 5000 ~ "$2000 - $5000",
+      BIKE_COST > 5000 ~ "> $5000"
+    )
+  )
+
+# Counting the number of thefts in each bike cost level
+bike_cost_count <- bike_thefts_csv %>%
+  group_by(bike_cost_level) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(percentage = count / sum(count) * 100)
+
+# Interactive Pie chart of theft cases by BIKE_COST level
+ggplot_bike_cost_interactive <- ggplot(bike_cost_count, aes(x = "", y = count, fill = bike_cost_level, tooltip = paste(bike_cost_level, "- Count:", count, " (", round(percentage, 2), "%)"))) +
+  geom_bar_interactive(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  scale_fill_brewer(palette = "Set3") + # Adding color palette to ensure enough colors for all categories
+  labs(
+    title = "Bicycle Theft Cases by Bike Cost Level",
+    fill = "Bike Cost Level"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.title = element_text(face = "bold")
+  )
+
+girafe(ggobj = ggplot_bike_cost_interactive)
+```

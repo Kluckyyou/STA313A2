@@ -1,0 +1,113 @@
+/* CSS for structure and text */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+    font-family: 'Lato', sans-serif;
+}
+
+p {
+    line-height: 1.75;
+    color: #333;
+}
+
+h1, h2 {
+    margin-top: 10px;
+    color: #222;
+}
+
+/* Styling for content sections */
+#introduction, #theft-overview, #their-targets, #prevention, #conclusion {
+    width: 60%;
+    max-width: 800px;
+    margin: 0 auto;
+    margin-bottom: 2em;
+}
+
+#introduction {
+    margin-top: 3em;
+}
+
+#end {
+    width: 60%;
+    max-width: 800px;
+    margin: 0 auto 2em auto;
+    padding-bottom: 3em;
+    font-size: 0.85em;
+    color: rgb(78, 78, 78);
+}
+
+#end a {
+    color: rgb(78, 78, 78);
+    text-decoration: none;
+}
+
+#end ul {
+    padding-left: 1em;
+}
+
+#conclusion :last-child {
+    padding-bottom: 2em;
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to right, #737373 30%, transparent 30%) 100% 1;
+}
+
+/* Chart and dropdown styling */
+.timechart {
+    display: none;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.locationchart {
+    display: none;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#time-selector {
+    display: block;
+    margin: 0 auto 1em auto;
+    padding: 0.5em;
+    font-size: 1em;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Tooltip styling */
+.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 5px;
+    font-size: 0.85em;
+    background: #333;
+    color: #fff;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#location-selector {
+    display: block;
+    margin: 0 auto 1em auto;
+    padding: 0.5em;
+    font-size: 1em;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #introduction, #theft-overview, #their-targets, #prevention, #conclusion, #end {
+        width: 90%;
+    }
+    
+    h1, h2 {
+        font-size: 1.5em;
+    }
+}
+
