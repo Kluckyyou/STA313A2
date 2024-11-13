@@ -1,5 +1,5 @@
 // Load the data
-d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
+d3.csv("../data/Bicycle_Thefts_Open_Data.csv").then(data => {
 
     // Aggregation functions for each plot type
     const countByYear = d3.rollup(data, v => v.length, d => d.OCC_YEAR);

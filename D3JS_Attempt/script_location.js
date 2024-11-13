@@ -1,5 +1,5 @@
 // Load the data
-d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
+d3.csv("../data/Bicycle_Thefts_Open_Data.csv").then(data => {
 
     // Aggregation function to get top 8 values for a specified category
     function getTop7(data, category) {

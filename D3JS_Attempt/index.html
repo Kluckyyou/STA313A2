@@ -10,6 +10,34 @@
 
   <body>
     <main>
+      <div id="intro" class="part1">
+        <div id="intro-headers">
+          <h1>Bikes are in danger</h1>
+          <h2>Analyze theft patterns and protect bicycles</h2>
+          <div id="about">
+            <p>Visualization made by Kevin You and Yuewen Zhang</p>
+            <p>Nov 12, 2024</p>
+          </div>
+        </div>
+        <svg id = "arrow">
+          <path d = "M0 0 L20 20 L40 0" opacity = "0">
+              <animate
+              attributeName = "d"
+              begin = "1s"
+              values = "M0 0 L20 20 L40 0; M0 20 L20 40 L40 20"
+              dur = "1.5s"
+              repeatCount = "indefinite" />
+              <animate
+              attributeName = "opacity"
+              begin = "1s"
+              values = "0; 1; 0"
+              dur = "1.5s"
+              repeatCount = "indefinite" />
+          </path>
+        </svg>
+        <video id="intro-vid" src="cover-vid.mp4" muted autoplay loop></video>
+      </div>
+
       <div id="introduction">
         <h2>Introduction</h2>
         <p>Bicycle theft is a common problem in many cities, especially in places where bicycles are the most important and convenient means of transportation. Toronto is a good example. In Toronto, bicycle theft cases are endless. The case display chart on the website shows that thefts often occur in every community. This problem causes economic losses to the owners and affects social security. Through this collation and analysis of the theft data and in-depth research, we hope to understand the targets and methods of theft and find ways to reduce the occurrence of cases.</p>

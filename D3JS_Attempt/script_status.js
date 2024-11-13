@@ -1,5 +1,5 @@
 // Load the data
-d3.csv("data/Bicycle_Thefts_Open_Data.csv").then(data => {
+d3.csv("../data/Bicycle_Thefts_Open_Data.csv").then(data => {
 
     // Filter for specific STATUS values
     const filteredData = data.filter(d => ["STOLEN", "RECOVERED", "UNKNOWN"].includes(d.STATUS));
