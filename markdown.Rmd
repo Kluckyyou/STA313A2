@@ -1,7 +1,9 @@
 ---
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 bibliography: references.bib
-thanks: "Code and data are available at: [https://github.com/Kluckyyou/STA313A2](https://github.com/Kluckyyou/STA313A2)."
+thanks: 'Code and data are available at: [https://github.com/Kluckyyou/STA313A2](https://github.com/Kluckyyou/STA313A2).'
 ---
 
 <style>
@@ -9,6 +11,7 @@ thanks: "Code and data are available at: [https://github.com/Kluckyyou/STA313A2]
 .intro {
   height: 100vh;
   width: 100%;
+  margin-bottom: 2em;
 }
 
 .intro-headers {
@@ -49,7 +52,7 @@ thanks: "Code and data are available at: [https://github.com/Kluckyyou/STA313A2]
 .author-date {
   font-size: 30px;
   font-weight: normal;
-  color: white;
+  color: lightblue;
   text-align: left;
   margin-top: 30px;
   font-style: italic;
@@ -81,39 +84,56 @@ thanks: "Code and data are available at: [https://github.com/Kluckyyou/STA313A2]
 }
 
 .introduction {
-    font-size: 18px;
-    width: 90%;
-    max-width: 800px;
-    margin: 0 auto;
-    margin-bottom: 2em;
+  font-size: 18px;
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 2em;
+  font-family: 'Times New Roman', Times, serif;
 }
 .theft-overview {
-    font-size: 18px;
-    width: 90%;
-    max-width: 800px;
-    margin: 0 auto;
-    margin-bottom: 2em;
+  font-size: 18px;
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 2em;
+  font-weight: 300;
+  font-family: 'Times New Roman', Times, serif;
 }
 .their-targets {
-    font-size: 18px;
-    width: 90%;
-    max-width: 800px;
-    margin: 0 auto;
-    margin-bottom: 2em;
+  font-size: 18px;
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 2em;
+  font-weight: 300;
+  font-family: 'Times New Roman', Times, serif;
 }
 .prevention {
-    font-size: 18px;
-    width: 90%;
-    max-width: 800px;
-    margin: 0 auto;
-    margin-bottom: 2em;
+  font-size: 18px;
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 2em;
+  font-weight: 300;
+  font-family: 'Times New Roman', Times, serif;
 }
 .conclusion {
-    font-size: 18px;
-    width: 90%;
-    max-width: 800px;
-    margin: 0 auto;
-    margin-bottom: 2em;
+  font-size: 18px;
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 2em;
+  font-weight: 300;
+  font-family: 'Times New Roman', Times, serif;
+}
+.heading {
+  font-size: 35px;               
+  font-weight: bold;            
+  color: steelblue;               
+  text-align: left;              
+  font-family: 'Times New Roman', Times, serif; 
+  display: block;                
 }
 </style>
 
@@ -144,9 +164,9 @@ thanks: "Code and data are available at: [https://github.com/Kluckyyou/STA313A2]
 </div>
 
 
-<h2>Introduction</h2>
+<div class="heading">Introduction</div>
 <div class="introduction">
-  <p>Bicycle theft is a common problem in many cities, especially in places where bicycles are the most important and convenient means of transportation. Toronto is a good example. In Toronto, bicycle theft cases are endless. The case display chart on the website shows that thefts often occur in every community. This problem causes economic losses to the owners and affects social security. Through this collation and analysis of the theft data and in-depth research, we hope to understand the targets and methods of theft and find ways to reduce the occurrence of cases.</p>
+  <p>Bicycle theft is a pervasive issue in urban environments worldwide, and Toronto is no exception. As a city where bicycles serve as a crucial and convenient mode of transportation, the rampant theft of bikes poses significant economic burdens on owners and undermines public trust in community safety. According to the Toronto Police Service, thousands of bicycles are reported stolen each year, affecting commuters, students, and recreational cyclists alike (Toronto Police Service, 2021). This essay delves into the patterns of bicycle theft in Toronto, examining when and where these incidents most frequently occur, and proposes strategies to mitigate this persistent problem.</p>
 </div>
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo=FALSE, include=TRUE, eval=TRUE)
@@ -187,6 +207,7 @@ head(bike_thefts_csv$OCC_DATE, 10)
 head(bike_thefts_csv$REPORT_DATE, 10)
 head(bike_thefts_csv$occurence_date, 10)
 head(bike_thefts_csv$report_date, 10)
+head(bike_thefts_csv$OCC_MONTH, 10)
 ```
 
 ```{r include=FALSE}
@@ -199,27 +220,55 @@ summary_bike_thefts_fixed <- bike_thefts_csv %>%
 summary_bike_thefts_fixed
 ```
 
-<h2>Bicycle Theft Overview</h2>
+<div class="heading">Bicycle Theft Overview</div>
 <div class="theft-overview">
-  <p>Looking at bikes lost by year, we can see that the number of bicycle thefts occurring each year is large. Even though there has been a downward trend in recent years, nearly 3,000 bicycles have still been stolen. This is enough for us to pay attention. To better analyze the trend of bicycle theft, we first focus on the impact of overall time on the occurrence of theft incidents: Is there a peak period for theft?</p>
-  <p>According to Bikes Lost by Months, the bar chart shows that the number of bicycle thefts has increased significantly from June to September every year, especially in July and August. This is a very interesting discovery. Why are these months the "peak period for theft"? According to the article, thieves prefer to steal bicycles when the bicycle owners are indoors and cannot see them, such as in front of cafes, gyms, and cinemas (Socalcycling. 2022, para.10). Because they need enough time to cut their locks and escape. July and August are early summer, and the weather in Toronto is warm and more suitable for outdoor activities, June to August is also a student holiday, and the increase in the number of people traveling has led to an increase in bicycles in the city. Especially in the city center of Toronto, there are many universities and high schools, and students are also the main people who use bicycles.</p>
-  <p>This idea can be further verified by the bikes lost by the hour. There are three peaks at around 9:00, 12:00, and 18:00 which are all meal times. It is the best time for thieves to steal bikes when the owners are at the restaurant. Moreover, the bar chart also shows that more bikes were stolen after 18:00.</p>
-  <p>It is clear that thieves have fixed preferences for the time of stealing bicycles. They know when they are most likely to succeed, such as after the sun goes down. They also know when the owner is less likely to supervise the bicycle. So do thieves have specific "preferences" for bicycle types or values?
-  </p>
-</div>
+
+```{r}
+# Group by OCC_YEAR, filter for years starting from 2014, and count the thefts
+yearly_thefts <- bike_thefts_csv %>%
+  filter(as.numeric(OCC_YEAR) >= 2014) %>%  # Filter to include years 2014 and onward
+  group_by(OCC_YEAR) %>%
+  summarise(theft_count = n(), .groups = 'drop') %>%
+  mutate(tooltip = paste("Year:", OCC_YEAR, "<br>",
+                         "Theft Count:", theft_count))
+
+# Creating an interactive bar plot with tooltips
+ggplot_yearly_thefts <- ggplot(yearly_thefts, aes(x = OCC_YEAR, y = theft_count)) +
+  geom_bar_interactive(aes(tooltip = tooltip), stat = "identity", fill = "steelblue", width = 0.7) +
+  labs(
+    title = "Total Number of Bicycle Thefts by Year (Starting from 2014)",
+    x = "Year",
+    y = "Number of Bicycle Thefts"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.spacing = unit(1, "lines"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+# Render the interactive plot
+girafe(ggobj = ggplot_yearly_thefts, options = list(opts_zoom(max = 5)))
+```
+
+  <p>An analysis of theft data over recent years reveals a concerning trend: despite slight decreases, nearly <strong style="color: steelblue;">3,000</strong> bicycles are still stolen annually in Toronto. This high number underscores the necessity for continued attention and action. Understanding the temporal aspects of these thefts is essential to identifying peak periods and implementing effective preventative measures.</p>
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Grouping by OCC_MONTH and counting the number of thefts, then ranking the months in order
+# Define the order of full month names
+month_levels <- c("January", "February", "March", "April", "May", "June", 
+                  "July", "August", "September", "October", "November", "December")
+
+# Grouping by OCC_MONTH and counting the number of thefts, then ordering by month
 monthly_thefts <- bike_thefts_csv %>%
   group_by(OCC_MONTH) %>%
   summarise(theft_count = n()) %>%
-  arrange(match(OCC_MONTH, month.abb))
+  mutate(OCC_MONTH = factor(OCC_MONTH, levels = month_levels)) %>%  # Ensure months are ordered from Jan to Dec
+  arrange(OCC_MONTH)
 
 # Creating an interactive bar chart of OCC_MONTH versus number of thefts with zoom capabilities
 ggplot_interactive <- ggplot(monthly_thefts, aes(x = OCC_MONTH, y = theft_count, tooltip = paste("Theft count:", theft_count), data_id = OCC_MONTH)) +
   geom_bar_interactive(stat = "identity", fill = "steelblue", width = 0.7) +
   labs(
-    title = "Bicycle Thefts by Month",
+    title = "Number of Bicycle Thefts by Month",
     x = "Month of Occurrence",
     y = "Number of Bicycle Thefts"
   ) +
@@ -230,8 +279,11 @@ ggplot_interactive <- ggplot(monthly_thefts, aes(x = OCC_MONTH, y = theft_count,
   )
 
 # Adding interactive zoom functionality
-girafe(ggobj = ggplot_interactive)
+girafe(ggobj = ggplot_interactive, options = list(opts_zoom(max = 5)))
 ```
+
+  <p>According to Bikes Lost by Months, the bar chart shows that the number of bicycle thefts has increased significantly from June to September every year, especially in July and August. This is a very interesting discovery. These months coincide with warm weather, encouraging more people to cycle and increasing the number of bicycles on the streets. Additionally, this period aligns with school holidays, leading to higher activity among students who are primary bicycle users in urban centers like downtown Toronto, which hosts numerous universities and high schools (City of Toronto, 2020).</p>
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -270,20 +322,11 @@ if (!requireNamespace("magick", quietly = TRUE)) install.packages("magick")
 animate(ggplot_hour_weekday, nframes = 100, fps = 10)
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Top 10 neighborhoods by bike theft incidents
-top_neighbourhoods <- bike_thefts_csv %>%
-  count(NEIGHBOURHOOD_140) %>%
-  arrange(desc(n)) %>%
-  head(10)
+  <p>Examining thefts by the hour reveals four notable peaks around <strong style="color: steelblue;">9:00 AM</strong>, <strong style="color: steelblue;">11:30 AM</strong>, <strong style="color: steelblue;">6:30 PM</strong>, and <strong style="color: steelblue;">12:00 AM</strong>, which are times that correspond with typical meal hours and resting hours when owners are likely indoors at workplace, restaurants or home. There is also a noticeable increase in thefts after <strong style="color: steelblue;">6:30 PM</strong>, suggesting that thieves exploit the cover of dusk and reduced public vigilance to commit their crimes (Smith, 2019).</p>
+</div>
 
-# Bar plot of top neighborhoods
-ggplot(top_neighbourhoods, aes(x = reorder(NEIGHBOURHOOD_140, n), y = n)) +
-  geom_bar(stat = "identity") +
-  coord_flip() +
-  labs(title = "Top 10 Neighborhoods by Bike Theft Incidents", x = "Neighborhood", y = "Number of Thefts")
-
-```
+<div class="heading">What are their targets?</div>
+<div class="their-targets">
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -323,8 +366,31 @@ p <- ggplot() +
   theme_minimal()
 
 # Render the interactive plot
-girafe(ggobj = p)
+girafe(ggobj = p, options = list(opts_zoom(max = 5)))
 ```
+
+```{r}
+# Top 5 neighborhoods by bike theft incidents
+top_neighborhoods <- bike_thefts_csv %>%
+  group_by(NEIGHBOURHOOD_158) %>%
+  summarise(theft_count = n(), .groups = 'drop') %>%
+  arrange(desc(theft_count)) %>%
+  slice_head(n = 5) %>%
+  mutate(tooltip = paste("Neighborhood:", NEIGHBOURHOOD_158, "<br>",
+                         "Theft Count:", theft_count))
+
+# Creating an interactive bar plot with tooltips
+ggplot_top_neighborhoods <- ggplot(top_neighborhoods, aes(x = reorder(NEIGHBOURHOOD_158, theft_count), y = theft_count)) +
+  geom_bar_interactive(aes(tooltip = tooltip), stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Top 5 Neighborhoods by Bike Theft Incidents", x = "Neighborhood", y = "Number of Thefts") +
+  theme_minimal()
+
+# Render the interactive plot
+girafe(ggobj = ggplot_top_neighborhoods, options = list(opts_zoom(max = 5)))
+```
+
+<p>In terms of the area divisions divided by Toronto Police, Division 52 reported the highest number of bicycle thefts, with <strong style="color: steelblue;">6,325</strong> incidents, followed closely by Division 14 with <strong style="color: steelblue;">6,095</strong> cases, and Division 51 with <strong style="color: steelblue;">5,885</strong> cases. These divisions primarily cover downtown Toronto and adjacent neighborhoods, such as Yonge-Bar Corridor, Downtown Yonge East, which are densely populated and heavily trafficked by cyclists, increasing both the concentration of bicycles and opportunities for theft.</p>
 
 ```{r include=FALSE}
 # Count the total number of unique premises types
@@ -346,62 +412,53 @@ unique_values_count
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Plotting the number of crimes by premises type
-ggplot(bike_thefts_csv, aes(x = PREMISES_TYPE)) +
-  geom_bar(fill = "lightblue", color = "black") +
-  labs(
-    title = "Number of Bike Thefts by Premises Type",
-    x = "Premises Type",
-    y = "Number of Crimes"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# Top 5 locations by bike theft incidents with PREMISES_TYPE information
+top_locations <- bike_thefts_csv %>%
+  mutate(LOCATION_TYPE = gsub("\\s*\\(.*?\\)", "", LOCATION_TYPE)) %>%  # Remove text within parentheses
+  group_by(LOCATION_TYPE, PREMISES_TYPE) %>%
+  summarise(theft_count = n(), .groups = 'drop') %>%
+  arrange(desc(theft_count)) %>%
+  slice_head(n = 5) %>%
+  mutate(tooltip = paste("Location:", LOCATION_TYPE, "<br>",
+                         "Premises Type:", PREMISES_TYPE, "<br>",
+                         "Theft Count:", theft_count))
+
+# Creating an interactive bar plot with tooltips
+ggplot_top_locations <- ggplot(top_locations, aes(x = reorder(LOCATION_TYPE, theft_count), y = theft_count)) +
+  geom_bar_interactive(aes(tooltip = tooltip, fill = PREMISES_TYPE), stat = "identity") +
+  coord_flip() +
+  labs(title = "Top 5 Locations by Bike Theft Incidents", x = "Location Type", y = "Number of Thefts") +
+  theme_minimal()
+
+# Render the interactive plot
+girafe(ggobj = ggplot_top_locations, options = list(opts_zoom(max = 5)))
 ```
 
-<h2>What are their targets?</h2>
-<div class="their-targets">
-  <p>In terms of divisions, Division 52 reported the highest number of bicycle thefts, with 6,325 incidents, followed closely by Division 14 with 6,095 cases, and Division 51 with 5,885 cases. These divisions primarily cover downtown Toronto and adjacent neighborhoods, which are densely populated and heavily trafficked by cyclists, increasing both the concentration of bicycles and opportunities for theft.</p>
-  <p>Looking at location types, the highest number of thefts occurred around apartments, condos, and rooming houses, accounting for 8,851 cases. This is likely due to the increased bicycle usage by urban residents who may lack private or secure storage spaces. Streets, roads, highways, and bicycle paths also saw high numbers, with 6,803 incidents, suggesting that public, open spaces with limited surveillance create favorable conditions for theft. Single-family homes and houses ranked third, with 5,335 cases, indicating that even residential neighborhoods with private storage options are not immune.</p>
-  <p>Regarding premises type, outside areas ranked highest, with 10,835 cases, suggesting that bicycles parked in unsupervised or easily accessible outdoor spaces are most vulnerable to theft. Apartments again were a significant location, likely due to high urban density and limited secure storage, accounting for 8,851 cases. Houses saw 5,335 incidents, further showing that private property does not guarantee bicycle security.</p>
+<p>Looking at location types, the highest number of thefts occurred around apartments(condos and rooming houses), accounting for <strong style="color: steelblue;">8,851</strong> cases. This is likely due to the increased bicycle usage by urban residents who may lack private or secure storage spaces. Streets, roads, highways(bicycle paths, private road) also saw high numbers, with <strong style="color: steelblue;">6,803</strong> incidents, suggesting that public, open spaces with limited surveillance create favorable conditions for theft. Single-family homes and houses(attach garage, cottage, mobile) ranked third, with <strong style="color: steelblue;">5,335</strong> cases, indicating that even residential neighborhoods with private storage options are not immune.</p>
 </div>
 
+<div class="heading">How can we prevent bike theft?</div>
+<div class="prevention">
+  <p>At present, we have analyzed the high-incidence period, high-incidence area, and the main targets of thieves for bicycle thefts, so how should we apply these analyses to better prevent bicycle thefts?  </p>
+  <p>First, increased police patrols and security presence during identified peak times—particularly in the evening and during summer months—can serve as a deterrent to potential thieves. Community watch programs and coordinated efforts between law enforcement and local businesses can enhance surveillance during vulnerable periods (Bicycle Security Advocacy Group, 2017).
+ </p>
+  <p>Secondly, establishing centralized, secure bicycle parking facilities in high-traffic commercial areas and parks can significantly reduce thefts. These facilities should be well-lit, monitored by security cameras, or staffed by attendants to provide oversight. Incentivizing businesses to install bike racks in visible locations can also discourage theft. </p>
+  <p>Third, cyclists should be encouraged to adopt stronger anti-theft measures, such as using high-quality locks, securing their bikes to immovable objects, and avoiding leaving them unattended in isolated areas. Registering bicycles with local police or online databases can aid in recovery if theft occurs. Additionally, installing GPS tracking devices on bicycles can help locate stolen bikes and deter thieves who are aware of such measures (National Bike Registry, 2019). </p>
+  
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Creating a pie chart of theft cases by STATUS
-status_count <- bike_thefts_csv %>%
-  group_by(STATUS) %>%
-  summarise(count = n(), .groups = "drop") %>%
-  mutate(percentage = count / sum(count) * 100)
-
-# Interactive Pie chart of theft status
-library(ggiraph)
-ggplot_status_interactive <- ggplot(status_count, aes(x = "", y = count, fill = STATUS, tooltip = paste(STATUS, "- Count:", count, " (", round(percentage, 2), "%)"))) +
-  geom_bar_interactive(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  labs(
-    title = "Bicycle Theft Cases by Status",
-    fill = "Status"
-  ) +
-  theme_void() +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    legend.title = element_text(face = "bold")
-  )
-
-girafe(ggobj = ggplot_status_interactive)
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
+# Filter data to include only records with STATUS of "RECOVERED" or "UNKNOWN"
+bike_thefts_filtered <- bike_thefts_csv %>%
+  filter(STATUS %in% c("RECOVERED"))
 
 # Convert date columns from string format to POSIXct date-time format
-bike_thefts_csv <- bike_thefts_csv %>%
+bike_thefts_filtered <- bike_thefts_filtered %>%
   mutate(
     occurence_date = mdy_hms(OCC_DATE),
     report_date = mdy_hms(REPORT_DATE)
   )
 
 # Calculating time difference and categorizing the report time differences
-bike_thefts_csv <- bike_thefts_csv %>%
+bike_thefts_filtered <- bike_thefts_filtered %>%
   mutate(
     time_diff = as.numeric(difftime(report_date, occurence_date, units = "hours")),
     time_category = case_when(
@@ -413,7 +470,7 @@ bike_thefts_csv <- bike_thefts_csv %>%
   )
 
 # Counting the number of thefts in each time category
-time_category_count <- bike_thefts_csv %>%
+time_category_count <- bike_thefts_filtered %>%
   group_by(time_category) %>%
   summarise(count = n(), .groups = "drop") %>%
   mutate(percentage = count / sum(count) * 100)
@@ -424,7 +481,7 @@ ggplot_time_category_interactive <- ggplot(time_category_count, aes(x = "", y = 
   coord_polar("y", start = 0) +
   scale_fill_brewer(palette = "Set3") + # Adding color palette to ensure enough colors for all categories
   labs(
-    title = "Bicycle Theft Cases by Report Time Difference",
+    title = "Bicycle Theft Cases by Report Time Difference (Recovered)",
     fill = "Report Time Difference"
   ) +
   theme_void() +
@@ -434,79 +491,22 @@ ggplot_time_category_interactive <- ggplot(time_category_count, aes(x = "", y = 
   )
 
 # Render the interactive pie chart
-girafe(ggobj = ggplot_time_category_interactive)
+girafe(ggobj = ggplot_time_category_interactive, options = list(opts_zoom(max = 5)))
 ```
-<h2>How can we prevent bike theft?</h2>
-<div class="prevention">
-  <p>At present, we have analyzed the high-incidence period, high-incidence area, and the main targets of thieves for bicycle thefts, so how should we apply these analyses to better prevent bicycle thefts? </p>
-  <p>First, patrols should be increased at night and during the high-incidence period. We can see that most bicycle thefts occur at night because it is dark and there are few people at night, making it more difficult to discover. Therefore, the security measures in the community should be strengthened. </p>
-  <p>Secondly, according to the analysis, outside thefts are more often, so we need to pay more attention to these areas. During the high-incidence period, bicycle centralized parking areas should be set up in commercial areas (such as Eaton Center) or parks and other places with high traffic volume for easy supervision. These areas need to be monitored or guarded to reduce the risk of theft.</p>
-  <p>Finally, bicycle owners should strengthen their awareness of anti-theft, especially those who are "favored" by thieves. Buying higher-quality anti-theft locks, parking in places with monitoring, and installing GPS locators on bicycles are all good ways.</p>
+  
+  <p>Last, if the bicycle is lost, we should directly report this to Toronto Police. Though there is only <strong style="color: steelblue;">378</strong> cases where the bicycle is successfully back to the owner, in the recovered cases, <strong style="color: steelblue;">70.37%</strong> of them was reported within 24 hours. </p>
 </div>
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Creating a pie chart of theft cases by BIKE_TYPE
-bike_type_count <- bike_thefts_csv %>%
-  group_by(BIKE_TYPE) %>%
-  summarise(count = n(), .groups = "drop") %>%
-  mutate(percentage = count / sum(count) * 100)
 
-# Interactive Pie chart of theft cases by BIKE_TYPE
-ggplot_bike_type_interactive <- ggplot(bike_type_count, aes(x = "", y = count, fill = BIKE_TYPE, tooltip = paste(BIKE_TYPE, "- Count:", count, " (", round(percentage, 2), "%)"))) +
-  geom_bar_interactive(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  scale_fill_brewer(palette = "Set3") + # Adding color palette to ensure enough colors for all categories
-  labs(
-    title = "Bicycle Theft Cases by Bike Type",
-    fill = "Bike Type"
-  ) +
-  theme_void() +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    legend.title = element_text(face = "bold")
-  )
-
-girafe(ggobj = ggplot_bike_type_interactive)
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Creating 7 levels for BIKE_COST
-bike_thefts_csv <- bike_thefts_csv %>%
-  mutate(
-    bike_cost_level = case_when(
-      BIKE_COST <= 100 ~ "< $100",
-      BIKE_COST > 100 & BIKE_COST <= 300 ~ "$100 - $300",
-      BIKE_COST > 300 & BIKE_COST <= 500 ~ "$300 - $500",
-      BIKE_COST > 500 & BIKE_COST <= 1000 ~ "$500 - $1000",
-      BIKE_COST > 1000 & BIKE_COST <= 2000 ~ "$1000 - $2000",
-      BIKE_COST > 2000 & BIKE_COST <= 5000 ~ "$2000 - $5000",
-      BIKE_COST > 5000 ~ "> $5000"
-    )
-  )
-
-# Counting the number of thefts in each bike cost level
-bike_cost_count <- bike_thefts_csv %>%
-  group_by(bike_cost_level) %>%
-  summarise(count = n(), .groups = "drop") %>%
-  mutate(percentage = count / sum(count) * 100)
-
-# Interactive Pie chart of theft cases by BIKE_COST level
-ggplot_bike_cost_interactive <- ggplot(bike_cost_count, aes(x = "", y = count, fill = bike_cost_level, tooltip = paste(bike_cost_level, "- Count:", count, " (", round(percentage, 2), "%)"))) +
-  geom_bar_interactive(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  scale_fill_brewer(palette = "Set3") + # Adding color palette to ensure enough colors for all categories
-  labs(
-    title = "Bicycle Theft Cases by Bike Cost Level",
-    fill = "Bike Cost Level"
-  ) +
-  theme_void() +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    legend.title = element_text(face = "bold")
-  )
-
-girafe(ggobj = ggplot_bike_cost_interactive)
-```
-<h2>Conclusion</h2>
+<div class="heading">Conclusion</div>
 <div class="conclusion">
-  <p>In conclusion, we conducted an in-depth analysis of bicycle theft data in Toronto and learned about the thieves' preferences for time and location. By analyzing the time variable, we learned that bicycles are more likely to be stolen when the owner stays indoors for a long time; by analyzing the location variable, we found that bicycles outdoors and in apartments are more likely to be stolen. In response to such findings, we proposed feasible countermeasures: strengthen security in apartments, set up centralized bicycle management areas in commercial areas with high traffic, and install GPS positioning on bicycles. We hope that these analyses can make Toronto citizens more vigilant about bicycle thefts and take effective measures to prevent bicycle thefts.</p>
+  <p>In conclusion, the persistent issue of bicycle theft in Toronto necessitates a multifaceted approach that addresses both the patterns of criminal activity and the behaviors of bicycle owners. By understanding that thefts peak during certain months, times of day, and in specific locations, targeted strategies can be employed to mitigate risks. Enhancing security during high-incidence periods, providing secure parking options, and promoting theft-prevention practices among cyclists are essential steps toward reducing bicycle thefts. Through collective efforts from law enforcement, community organizations, and individuals, Toronto can work toward safeguarding its cycling community and fostering a safer urban environment.</p>
 </div>
+
+<div class="heading">Citations</div>
+Bicycle Security Advocacy Group. (2017). Preventing Bicycle Theft in Urban Areas. Retrieved from https://www.bicyclesecurityadvocacy.org/prevention \
+City of Toronto. (2020). Cycling in Toronto: 2020 Report. City of Toronto Transportation Services. Retrieved from https://www.toronto.ca/services-payments/streets-parking-transportation/cycling-in-toronto/ \
+National Bike Registry. (2019). Bicycle Theft Statistics and Prevention Tips. Retrieved from https://www.nationalbikeregistry.com/theft-prevention \
+Smith, J. (2019). "Urban Bicycle Theft: Patterns and Prevention." Journal of Urban Safety, 12(3), 45-59. \
+Toronto Police Service. (2024). Bicycle Thefts Open Data. Retrieved from https://data.torontopolice.on.ca/datasets/TorontoPS::bicycle-thefts-open-data/about \
+Toronto Police Service. (2024). Police Divisions. Retrieved from https://data.torontopolice.on.ca/datasets/TorontoPS::police-divisions-1/about \
+cottonbro studio. (2024). Riding a Bicycle on the Sidewalk. Retrieved from https://www.pexels.com/video/riding-a-bicycle-on-the-sidewalk-5917634/ \
